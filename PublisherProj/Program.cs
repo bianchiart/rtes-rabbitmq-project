@@ -1,38 +1,25 @@
-﻿using System.Text;
-using RabbitMQ.Client;
-using SharedDomain;
+﻿using RabbitMQ.Client;
+using SharedDomain.ConfigurationUtils;
+using SharedDomain.Publisher;
 
-var factory = new ConnectionFactory { HostName = "localhost" };
-using var connection = factory.CreateConnection();
-using var channel = connection.CreateModel();
-var configuration = ConfigurationFactory.GetConfiguration();
-
-channel.QueueDeclare(queue: configuration.QueueName,
-                        durable: false,
-                        exclusive: false,
-                        autoDelete: false,
-                        arguments: null);
-
-var totalMessagesToSend = configuration.NumberOfMessagesPerRun * configuration.NumberOfRuns;
-for (int i = 1; i <= totalMessagesToSend; i++)
+namespace PublisherProj
 {
-    string message = $"{i},msg,{DateTime.Now.TimeOfDay}";
-    var body = Encoding.UTF8.GetBytes(message);
-    channel.BasicPublish(exchange: string.Empty,
-                     routingKey: configuration.QueueName,
-                     basicProperties: null,
-                     body: body);
-    Console.WriteLine($"Sent {message}");
-
-    if (i % configuration.NumberOfMessagesPerRun == 0)
+    public class Program
     {
-        if(configuration.CooldownSeconds > 0)
+        public static void Main(string[] args)
         {
-            Thread.Sleep(configuration.CooldownSeconds * 1000);
+            var configuration = ConfigurationFactory.GetConfiguration();
+            var factory = new ConnectionFactory { HostName = configuration.RabbitMQHostName };
+            using var connection = factory.CreateConnection();
+            using var channel = connection.CreateModel();
+
+            var publisher = new Publisher(configuration);
+            publisher.Execute(channel);
+
+            Console.WriteLine(" Press [enter] to exit.");
+            Console.ReadLine();
         }
     }
 }
 
-Console.WriteLine(" Press [enter] to exit.");
-Console.ReadLine();
 

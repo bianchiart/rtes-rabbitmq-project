@@ -1,4 +1,4 @@
-﻿namespace SharedDomain
+﻿namespace SharedDomain.BenchmarkUtils
 {
     public static class StatisticsCalculator
     {

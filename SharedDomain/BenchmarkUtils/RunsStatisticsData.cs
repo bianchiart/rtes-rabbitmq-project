@@ -1,4 +1,4 @@
-﻿namespace SharedDomain
+﻿namespace SharedDomain.BenchmarkUtils
 {
     public class RunsStatisticsData
     {
@@ -43,7 +43,7 @@
         }
         public override string ToString()
         {
-            return $"In the period of the tests, avg throughput was {AverageThroughput} msg/ms" +
+            return $"In the period of the tests, avg throughput was {AverageThroughput} msg/ms " +
                 $"and avg jitter was {AverageJitter} ms. {Environment.NewLine}" +
                 $"Max throughput was {MaxThroughput} msg/ms and min jitter was {MinJitter} ms. {Environment.NewLine}" +
                 $"Min throughput was {MinThroughput} msg/ms and max jitter was {MaxJitter} ms. {Environment.NewLine}";

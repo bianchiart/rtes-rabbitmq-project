@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharedDomain
+namespace SharedDomain.BenchmarkUtils
 {
     public class StatisticsData
     {
