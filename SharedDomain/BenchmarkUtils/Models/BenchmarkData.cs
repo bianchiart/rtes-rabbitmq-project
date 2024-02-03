@@ -1,4 +1,4 @@
-﻿namespace SharedDomain.BenchmarkUtils
+﻿namespace SharedDomain.BenchmarkUtils.Models
 {
     public class BenchmarkData
     {
@@ -7,10 +7,11 @@
         public TimeSpan SentTime;
         public TimeSpan ReceivedTime;
         public TimeSpan PacketDelay;
+
         public BenchmarkData(
-            long messageNumber, 
-            string message, 
-            TimeSpan sentTime, 
+            long messageNumber,
+            string message,
+            TimeSpan sentTime,
             TimeSpan receivedTime,
             TimeSpan packetDelay)
         {

@@ -5,9 +5,9 @@ using SharedDomain.BenchmarkUtils.Models;
 using SharedDomain.ConfigurationUtils;
 using System.Text;
 
-namespace SharedDomain.Consumers.QoS
+namespace SharedDomain.Consumers.Competitive
 {
-    public class ConsumerQoS
+    public class ConsumerCompetitive
     {
         private List<BenchmarkData> _packetsData;
         private List<StatisticsData> _statisticsData;
@@ -15,15 +15,16 @@ namespace SharedDomain.Consumers.QoS
         private string _queueName;
         private int _numberOfRuns;
         private int _totalMessagesToReceive;
-        private ushort _qosPrefetchLevel;
+        private int _numberOfCompetitiveConsumers;
         private string _consumerQosLogsFileWindows;
         private string _consumerQosLogsFileUnix;
 
-        public ConsumerQoS(Configuration configuration)
+        public ConsumerCompetitive(Configuration configuration)
         {
             _numberOfMessagesPerRun = configuration.NumberOfMessagesPerRun;
             _queueName = configuration.QueueName;
             _numberOfRuns = configuration.NumberOfRuns;
+            _numberOfCompetitiveConsumers = configuration.NumberOfCompetitiveConsumers;
             _totalMessagesToReceive = _numberOfMessagesPerRun * _numberOfRuns;
             _consumerQosLogsFileUnix = configuration.ConsumerQosLogsFileUnix;
             _consumerQosLogsFileWindows = configuration.ConsumerQosLogsFileWindows;
@@ -32,7 +33,7 @@ namespace SharedDomain.Consumers.QoS
             _statisticsData = new List<StatisticsData>();
         }
 
-        public void InitializeConsumer(IModel channel)
+        public void InitializeConsumers(IModel channel)
         {
             channel.QueueDeclare(
                 queue: _queueName,
@@ -41,50 +42,52 @@ namespace SharedDomain.Consumers.QoS
                 autoDelete: false,
                 arguments: null);
 
-            channel.BasicQos(0, (ushort)_qosPrefetchLevel, false);
+            channel.BasicQos(0, 1, false);
 
-            var consumer = new EventingBasicConsumer(channel);
-
-            consumer.Received += Consume;
-
-            channel.BasicConsume(
-                queue: _queueName,
-                autoAck: true,
-                consumer: consumer);
+            InstantiateConsumers(channel);
         }
 
-        private void Consume(object? model, BasicDeliverEventArgs eventArgs)
+        private void InstantiateConsumers(IModel channel) 
         {
-            var benchmarkData = ObtainMessageData(eventArgs);
+            var consumers = new List<EventingBasicConsumer>();
 
-            _packetsData.Add(benchmarkData);
+            for (int i = 0; i < _numberOfCompetitiveConsumers; i++)
+            {
+                var consumer = new EventingBasicConsumer(channel);
+                consumer.Received += ConsumeMethod;
+                consumers.Add(consumer);
+            }
 
-            WriteMessageOnConsole(benchmarkData);
-            WriteSingleRunLog(benchmarkData);
-            WriteMultipleRunsLog(benchmarkData);
+            foreach (var consumer in consumers)
+            {
+                channel.BasicConsume(
+                    queue: _queueName,
+                    autoAck: true,
+                    consumer: consumer);
+            }
         }
 
-        private BenchmarkData ObtainMessageData(BasicDeliverEventArgs eventArgs)
+        private void ConsumeMethod(object? model, BasicDeliverEventArgs eventArgs)
         {
             var receivedTime = DateTime.UtcNow.TimeOfDay;
             var body = eventArgs.Body.ToArray();
             var message = Encoding.UTF8.GetString(body).Split(',');
             var sentTime = TimeSpan.Parse(message[2]);
             var delay = receivedTime - sentTime;
-
-            return new BenchmarkData(
+            var benchmarkData = new BenchmarkData(
                 int.Parse(message[0]),
                 message[1],
                 sentTime,
                 receivedTime,
                 delay);
-        }
 
-        private void WriteMessageOnConsole(BenchmarkData benchmarkData)
-        {
-            Console.WriteLine($"Sent" +
-                $" {benchmarkData.SentTime} | Received {benchmarkData.ReceivedTime} " +
+            _packetsData.Add(benchmarkData);
+            Console.WriteLine($"Consumer {eventArgs.ConsumerTag} | Sent " +
+                $"| {benchmarkData.SentTime} | Received {benchmarkData.ReceivedTime} " +
                 $"| Msg number {benchmarkData.MessageNumber}");
+
+            WriteSingleRunLog(benchmarkData);
+            WriteMultipleRunsLog(benchmarkData);
         }
 
         private void WriteSingleRunLog(BenchmarkData benchmarkData)

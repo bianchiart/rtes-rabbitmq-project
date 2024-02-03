@@ -18,7 +18,5 @@
 
 	<ItemGroup>
 		<Folder Include="ConfigurationUtils/"></Folder>
-		<Folder Include="BenchmarkUtils/"></Folder>
-		<Folder Include="Consumers\Competitive\" />
 	</ItemGroup>
 </Project>

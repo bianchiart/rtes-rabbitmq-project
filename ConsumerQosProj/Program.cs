@@ -15,7 +15,7 @@ namespace ConsumerQosProj
 
             var consumerQoS = new ConsumerQoS(configuration);
             
-            Console.WriteLine("Creating consumer...");
+            Console.WriteLine("Initializing consumer...");
             consumerQoS.InitializeConsumer(channel);
 
             Console.WriteLine($"Consumer QoS waiting for messages...");

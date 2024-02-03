@@ -10,6 +10,7 @@ namespace SharedDomain.ConfigurationUtils
         public ushort QosPrefetchLevel { get; private set; }
         public int CooldownSeconds { get; private set; }
         public int PublisherInterMessageDelayMilliseconds { get; private set; }
+        public int NumberOfCompetitiveConsumers { get; private set; }
         public string ConsumerQosLogsFileWindows { get; private set; }
         public string CompetitiveConsumersLogsFileWindows { get; private set; }
         public string ConsumerQosLogsFileUnix { get; private set; }
@@ -23,6 +24,7 @@ namespace SharedDomain.ConfigurationUtils
             ushort qosPrefetchLevel,
             int cooldownSeconds,
             int publisherInterMessageDelayMilliseconds,
+            int numberOfCompetitiveConsumers,
             string consumerQosLogsFileWindows,
             string competitiveConsumersLogsFileWindows,
             string consumerQosLogsFileUnix,
@@ -35,6 +37,7 @@ namespace SharedDomain.ConfigurationUtils
             QosPrefetchLevel = qosPrefetchLevel;
             CooldownSeconds = cooldownSeconds;
             PublisherInterMessageDelayMilliseconds = publisherInterMessageDelayMilliseconds;
+            NumberOfCompetitiveConsumers = numberOfCompetitiveConsumers;
             ConsumerQosLogsFileWindows = consumerQosLogsFileWindows;
             CompetitiveConsumersLogsFileWindows = competitiveConsumersLogsFileWindows;
             ConsumerQosLogsFileUnix = consumerQosLogsFileUnix;

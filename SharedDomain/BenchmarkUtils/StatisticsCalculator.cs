@@ -1,4 +1,6 @@
-﻿namespace SharedDomain.BenchmarkUtils
+﻿using SharedDomain.BenchmarkUtils.Models;
+
+namespace SharedDomain.BenchmarkUtils
 {
     public static class StatisticsCalculator
     {
