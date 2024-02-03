@@ -8,6 +8,7 @@ namespace ConsumerQosProj
     {
         public static void Main(string[] args)
         {
+            Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
             var configuration = ConfigurationFactory.GetConfiguration();
             var factory = new ConnectionFactory { HostName = configuration.RabbitMQHostName };
             using var connection = factory.CreateConnection();
