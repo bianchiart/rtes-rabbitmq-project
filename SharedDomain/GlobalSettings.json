@@ -1,0 +1,11 @@
+﻿{
+  "QueueName": "RabbitMQTest",
+  "NumberOfMessagesPerRun": 1000,
+  "NumberOfRuns": 10,
+  "QosPrefetchLevel": 5,
+  "CooldownSeconds": 10,
+  "ConsumerQosLogsFileWindows": "D:\\Monnezza\\logsQoS.txt",
+  "CompetitiveConsumersLogsFileWindows": "D:\\Monnezza\\logsCompCons.txt",
+  "ConsumerQosLogsFileUnix": "/etc/logsQoS.txt",
+  "CompetitiveConsumersLogsFileUnix": "/etc/logsCompCons.txt"
+}
