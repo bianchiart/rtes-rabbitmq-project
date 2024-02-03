@@ -16,8 +16,8 @@ namespace SharedDomain.Consumers.Competitive
         private int _numberOfRuns;
         private int _totalMessagesToReceive;
         private int _numberOfCompetitiveConsumers;
-        private string _consumerQosLogsFileWindows;
-        private string _consumerQosLogsFileUnix;
+        private string _consumerCompetitiveLogsFileWindows;
+        private string _consumerCompetitiveLogsFileUnix;
 
         public ConsumerCompetitive(Configuration configuration)
         {
@@ -26,8 +26,8 @@ namespace SharedDomain.Consumers.Competitive
             _numberOfRuns = configuration.NumberOfRuns;
             _numberOfCompetitiveConsumers = configuration.NumberOfCompetitiveConsumers;
             _totalMessagesToReceive = _numberOfMessagesPerRun * _numberOfRuns;
-            _consumerQosLogsFileUnix = configuration.ConsumerQosLogsFileUnix;
-            _consumerQosLogsFileWindows = configuration.ConsumerQosLogsFileWindows;
+            _consumerCompetitiveLogsFileUnix = configuration.CompetitiveConsumersLogsFileUnix;
+            _consumerCompetitiveLogsFileWindows = configuration.CompetitiveConsumersLogsFileWindows;
 
             _packetsData = new List<BenchmarkData>();
             _statisticsData = new List<StatisticsData>();
@@ -97,8 +97,8 @@ namespace SharedDomain.Consumers.Competitive
                 var statistics = StatisticsCalculator.Calculate(_packetsData);
                 WriteStatisticsOnFile.Write(
                     statistics,
-                    _consumerQosLogsFileWindows,
-                    _consumerQosLogsFileUnix);
+                    _consumerCompetitiveLogsFileWindows,
+                    _consumerCompetitiveLogsFileUnix);
                 _statisticsData.Add(statistics);
                 _packetsData.Clear();
             }
@@ -111,8 +111,8 @@ namespace SharedDomain.Consumers.Competitive
                 var runsStatistics = StatisticsCalculator.Calculate(_statisticsData);
                 WriteStatisticsOnFile.Write(
                     runsStatistics,
-                    _consumerQosLogsFileWindows,
-                    _consumerQosLogsFileUnix);
+                    _consumerCompetitiveLogsFileWindows,
+                    _consumerCompetitiveLogsFileUnix);
                 _statisticsData.Clear();
             }
         }
