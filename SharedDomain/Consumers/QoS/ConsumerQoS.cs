@@ -41,8 +41,7 @@ namespace SharedDomain.Consumers.QoS
                 autoDelete: false,
                 arguments: null);
 
-            channel.BasicQos(0, (ushort)_qosPrefetchLevel, false);
-
+            channel.BasicQos(0, _qosPrefetchLevel, true);
             var consumer = new EventingBasicConsumer(channel);
 
             consumer.Received += Consume;
@@ -82,16 +81,17 @@ namespace SharedDomain.Consumers.QoS
 
         private void WriteMessageOnConsole(BenchmarkData benchmarkData)
         {
-            Console.WriteLine($"Sent" +
-                $" {benchmarkData.SentTime} | Received {benchmarkData.ReceivedTime} " +
-                $"| Msg number {benchmarkData.MessageNumber}");
+            Console.WriteLine($"Sent : {benchmarkData.SentTime} | " +
+                $"Received : {benchmarkData.ReceivedTime} " +
+                $"| Msg number  : {benchmarkData.MessageNumber}");
         }
 
         private void WriteSingleRunLog(BenchmarkData benchmarkData)
         {
             if (benchmarkData.MessageNumber % _numberOfMessagesPerRun == 0)
             {
-                var statistics = StatisticsCalculator.Calculate(_packetsData);
+                var statistics = StatisticsCalculator.Calculate(
+                    _packetsData, (int)(benchmarkData.MessageNumber / _numberOfMessagesPerRun));
                 WriteStatisticsOnFile.Write(
                     statistics,
                     _consumerQosLogsFileWindows,

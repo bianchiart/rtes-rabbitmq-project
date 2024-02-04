@@ -1,9 +1,10 @@
 ﻿{
   "QueueName": "RabbitMQTest",
-  "NumberOfMessagesPerRun": 1000,
+  "NumberOfMessagesPerRun": 200000,
   "NumberOfRuns": 10,
-  "QosPrefetchLevel": 5,
-  "CooldownSeconds": 10,
+  "QosPrefetchLevel": 1,
+  "QoSPrefetchLevelMultiple":  5,
+  "CooldownSeconds": 4,
   "PublisherInterMessageDelayMilliseconds": 0,
   "NumberOfCompetitiveConsumers": 5,
   "ConsumerQosLogsFileWindows": "D:\\Monnezza\\logsQoS.txt",

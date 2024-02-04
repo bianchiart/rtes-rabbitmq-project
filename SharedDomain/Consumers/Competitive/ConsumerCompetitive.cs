@@ -14,6 +14,7 @@ namespace SharedDomain.Consumers.Competitive
         private int _numberOfMessagesPerRun;
         private string _queueName;
         private int _numberOfRuns;
+        private ushort _qosPrefetchLevelMultiple;
         private int _totalMessagesToReceive;
         private int _numberOfCompetitiveConsumers;
         private string _consumerCompetitiveLogsFileWindows;
@@ -28,6 +29,7 @@ namespace SharedDomain.Consumers.Competitive
             _totalMessagesToReceive = _numberOfMessagesPerRun * _numberOfRuns;
             _consumerCompetitiveLogsFileUnix = configuration.CompetitiveConsumersLogsFileUnix;
             _consumerCompetitiveLogsFileWindows = configuration.CompetitiveConsumersLogsFileWindows;
+            _qosPrefetchLevelMultiple = configuration.QoSPrefetchLevelMultiple;
 
             _packetsData = new List<BenchmarkData>();
             _statisticsData = new List<StatisticsData>();
@@ -42,12 +44,13 @@ namespace SharedDomain.Consumers.Competitive
                 autoDelete: false,
                 arguments: null);
 
-            channel.BasicQos(0, 1, false);
+            channel.BasicQos(0, _qosPrefetchLevelMultiple, true);
 
             InstantiateConsumers(channel);
+            Console.WriteLine($"Number of consumers on queue {_queueName} : {channel.ConsumerCount(_queueName)}");
         }
 
-        private void InstantiateConsumers(IModel channel) 
+        private void InstantiateConsumers(IModel channel)
         {
             var consumers = new List<EventingBasicConsumer>();
 
@@ -74,6 +77,7 @@ namespace SharedDomain.Consumers.Competitive
             var message = Encoding.UTF8.GetString(body).Split(',');
             var sentTime = TimeSpan.Parse(message[2]);
             var delay = receivedTime - sentTime;
+
             var benchmarkData = new BenchmarkData(
                 int.Parse(message[0]),
                 message[1],
@@ -82,9 +86,9 @@ namespace SharedDomain.Consumers.Competitive
                 delay);
 
             _packetsData.Add(benchmarkData);
-            Console.WriteLine($"Consumer {eventArgs.ConsumerTag} | Sent " +
-                $"| {benchmarkData.SentTime} | Received {benchmarkData.ReceivedTime} " +
-                $"| Msg number {benchmarkData.MessageNumber}");
+
+            Console.WriteLine($"Sent : {benchmarkData.SentTime} | Received : {benchmarkData.ReceivedTime} " +
+                $"| Msg number : {benchmarkData.MessageNumber}");
 
             WriteSingleRunLog(benchmarkData);
             WriteMultipleRunsLog(benchmarkData);
@@ -94,7 +98,9 @@ namespace SharedDomain.Consumers.Competitive
         {
             if (benchmarkData.MessageNumber % _numberOfMessagesPerRun == 0)
             {
-                var statistics = StatisticsCalculator.Calculate(_packetsData);
+                var statistics = StatisticsCalculator.Calculate(
+                    _packetsData, (int)(benchmarkData.MessageNumber / _numberOfMessagesPerRun));
+                CheckMessageOrder(_packetsData.Select(x => x.MessageNumber).ToArray());
                 WriteStatisticsOnFile.Write(
                     statistics,
                     _consumerCompetitiveLogsFileWindows,
@@ -115,6 +121,19 @@ namespace SharedDomain.Consumers.Competitive
                     _consumerCompetitiveLogsFileUnix);
                 _statisticsData.Clear();
             }
+        }
+
+        private void CheckMessageOrder(long[] messageIndexes)
+        {
+            for (int i = 1; i < messageIndexes.Length; i++)
+            {
+                if (messageIndexes[i - 1] > messageIndexes[i])
+                {
+                    Console.WriteLine("Messages were not consumed in correct order :(");
+                    return;
+                }
+            }
+            Console.WriteLine("Messages were consumed in correct order :)");
         }
     }
 }

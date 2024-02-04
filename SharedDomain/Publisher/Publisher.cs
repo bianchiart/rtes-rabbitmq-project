@@ -48,7 +48,7 @@ namespace SharedDomain.Publisher
                     routingKey: _queueName,
                     basicProperties: null,
                     body: body);
-
+                
                 Console.WriteLine($"{dateTimeNow} : Sent message number {i}");
                 
                 ExecuteCooldowns(i);

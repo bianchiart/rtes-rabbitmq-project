@@ -8,6 +8,7 @@ namespace SharedDomain.ConfigurationUtils
         public int NumberOfMessagesPerRun { get; private set; }
         public int NumberOfRuns { get; private set; }
         public ushort QosPrefetchLevel { get; private set; }
+        public ushort QoSPrefetchLevelMultiple { get; private set; }
         public int CooldownSeconds { get; private set; }
         public int PublisherInterMessageDelayMilliseconds { get; private set; }
         public int NumberOfCompetitiveConsumers { get; private set; }
@@ -22,6 +23,7 @@ namespace SharedDomain.ConfigurationUtils
             int numberOfMessagesPerRun,
             int numberOfRuns,
             ushort qosPrefetchLevel,
+            ushort qosPrefetchLevelMultiple,
             int cooldownSeconds,
             int publisherInterMessageDelayMilliseconds,
             int numberOfCompetitiveConsumers,
@@ -35,6 +37,7 @@ namespace SharedDomain.ConfigurationUtils
             NumberOfMessagesPerRun = numberOfMessagesPerRun;
             NumberOfRuns = numberOfRuns;
             QosPrefetchLevel = qosPrefetchLevel;
+            QoSPrefetchLevelMultiple = qosPrefetchLevelMultiple;
             CooldownSeconds = cooldownSeconds;
             PublisherInterMessageDelayMilliseconds = publisherInterMessageDelayMilliseconds;
             NumberOfCompetitiveConsumers = numberOfCompetitiveConsumers;
@@ -43,6 +46,21 @@ namespace SharedDomain.ConfigurationUtils
             ConsumerQosLogsFileUnix = consumerQosLogsFileUnix;
             CompetitiveConsumersLogsFileUnix = competitiveConsumersLogsFileUnix;
             RabbitMQHostName = rabbitMQHostName;
+        }
+
+        public void PrintConfigurationSettings()
+        {
+            Console.WriteLine($"Settings: {Environment.NewLine}" +
+                $"QueueName : {QueueName} {Environment.NewLine}" +
+                $"Number of messages per run : {NumberOfMessagesPerRun}{Environment.NewLine}" +
+                $"Number of runs : {NumberOfRuns} {Environment.NewLine}" +
+                $"QoS prefetch count for single consumer case: {QosPrefetchLevel} {Environment.NewLine}" +
+                $"QoS prefetch count for multiple consumer case: {QoSPrefetchLevelMultiple} {Environment.NewLine}" +
+                $"Inter run cooldown seconds : {CooldownSeconds} {Environment.NewLine}" +
+                $"Publisher intermessage delay ms : {PublisherInterMessageDelayMilliseconds} {Environment.NewLine}" +
+                $"Number of competitive consumers: {NumberOfCompetitiveConsumers} {Environment.NewLine}" +
+                $"Rabbit host : {RabbitMQHostName}");
+
         }
     }
 

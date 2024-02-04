@@ -14,6 +14,8 @@ namespace ConsumerCompetitiveProj
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
 
+            configuration.PrintConfigurationSettings();
+
             var consumerCompetitive = new ConsumerCompetitive(configuration);
 
             Console.WriteLine("Initializing consumers...");

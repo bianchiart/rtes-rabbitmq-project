@@ -13,6 +13,8 @@ namespace PublisherProj
             var factory = new ConnectionFactory { HostName = configuration.RabbitMQHostName };
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
+            
+            configuration.PrintConfigurationSettings();
 
             var publisher = new Publisher(configuration);
             publisher.Execute(channel);

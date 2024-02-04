@@ -13,7 +13,9 @@ namespace ConsumerQosProj
             var factory = new ConnectionFactory { HostName = configuration.RabbitMQHostName };
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
-
+            
+            configuration.PrintConfigurationSettings();
+            
             var consumerQoS = new ConsumerQoS(configuration);
             
             Console.WriteLine("Initializing consumer...");

@@ -4,6 +4,7 @@
     {
         public double AverageThroughput { get; set; }
         public double AverageJitter { get; set; }
+        public double ThroughputVariation { get; set; }
         public double MaxThroughput { get; set; }
         public double MaxJitter { get; set; }
         public double MinThroughput { get; set; }
@@ -12,6 +13,7 @@
         private RunsStatisticsData(
             double averageThroughput,
             double averageJitter,
+            double throughputVariation,
             double maxThroughput,
             double maxJitter,
             double minThroughput,
@@ -19,6 +21,7 @@
         {
             AverageThroughput = averageThroughput;
             AverageJitter = averageJitter;
+            ThroughputVariation = throughputVariation;
             MaxThroughput = maxThroughput;
             MaxJitter = maxJitter;
             MinThroughput = minThroughput;
@@ -28,6 +31,7 @@
         public static RunsStatisticsData Create(
             double averageThroughput,
             double averageJitter,
+            double throughputVariation,
             double maxThroughput,
             double maxJitter,
             double minThroughput,
@@ -36,6 +40,7 @@
             return new RunsStatisticsData(
                 averageThroughput,
                 averageJitter,
+                throughputVariation,
                 maxThroughput,
                 maxJitter,
                 minThroughput,
@@ -43,9 +48,16 @@
         }
         public override string ToString()
         {
-            return $"In the period of the tests, avg throughput was {AverageThroughput} msg/ms and avg jitter was {AverageJitter} ms. {Environment.NewLine}" +
-                $"Max throughput was {MaxThroughput} msg/ms and min jitter was {MinJitter} ms. {Environment.NewLine}" +
-                $"Min throughput was {MinThroughput} msg/ms and max jitter was {MaxJitter} ms. {Environment.NewLine}";
+            return $"Runs Completed.{Environment.NewLine}" +
+                $"Avg throughput : {AverageThroughput} msg/ms {Environment.NewLine}" +
+                $"Avg jitter : {AverageJitter} ms {Environment.NewLine}" +
+                $"Throughput variation: {ThroughputVariation} msg/ms {Environment.NewLine}" +
+                $"Max throughput : {MaxThroughput} msg/ms {Environment.NewLine}" +
+                $"Min jitter was {MinJitter} ms {Environment.NewLine}" +
+                $"Min throughput was {MinThroughput} msg/ms {Environment.NewLine}" +
+                $"Max jitter was {MaxJitter} ms {Environment.NewLine}"+
+                $"------------------------------------------------";
+                
         }
     }
 }
