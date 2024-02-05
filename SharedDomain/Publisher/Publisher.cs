@@ -12,6 +12,8 @@ namespace SharedDomain.Publisher
         private int _cooldownSeconds;
         private int _totalMessagesToSend;
         private int _interMessageDelayMilliseconds;
+        private int _messagesTimeToLive;
+
         public Publisher(Configuration configuration)
         {
             _numberOfMessagesPerRun = configuration.NumberOfMessagesPerRun;
@@ -20,16 +22,24 @@ namespace SharedDomain.Publisher
             _cooldownSeconds = configuration.CooldownSeconds;
             _totalMessagesToSend = _numberOfMessagesPerRun * _numberOfRuns;
             _interMessageDelayMilliseconds = configuration.PublisherInterMessageDelayMilliseconds;
+            _messagesTimeToLive = configuration.TimeToLiveMilliseconds;
+
         }
 
         public void Execute(IModel channel)
         {
+            var args = new Dictionary<string, object>();
+            if (_messagesTimeToLive > 0)
+            {
+                args.Add("x-message-ttl", _messagesTimeToLive);
+            }
+
             channel.QueueDeclare(
                 queue: _queueName,
                 durable: false,
                 exclusive: false,
-                autoDelete: false,
-                arguments: null);
+                autoDelete: true,
+                arguments: args.Keys.Count > 0 ? args : null);
 
             SendMessages(channel);
         }

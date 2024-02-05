@@ -12,7 +12,8 @@ namespace SharedDomain.BenchmarkUtils
                 runIndex: runIndex,
                 throughput: CalculateThroughput(packetsData, globalTimePeriod),
                 timePeriodOfBenchmark: globalTimePeriod,
-                jitter: CalculateJitter(packetsData));
+                jitter: CalculateJitter(packetsData),
+                numberOfPackets: packetsData.Count);
         }
 
         public static RunsStatisticsData Calculate(List<StatisticsData> runsData) 

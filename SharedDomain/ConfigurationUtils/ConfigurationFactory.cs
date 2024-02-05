@@ -9,13 +9,17 @@ namespace SharedDomain.ConfigurationUtils
         public int NumberOfRuns { get; private set; }
         public ushort QosPrefetchLevel { get; private set; }
         public ushort QoSPrefetchLevelMultiple { get; private set; }
+        public int TimeToLiveMilliseconds { get; private set; }
         public int CooldownSeconds { get; private set; }
         public int PublisherInterMessageDelayMilliseconds { get; private set; }
+        public int ConsumerDelayMilliseconds { get; private set; }
         public int NumberOfCompetitiveConsumers { get; private set; }
         public string ConsumerQosLogsFileWindows { get; private set; }
         public string CompetitiveConsumersLogsFileWindows { get; private set; }
         public string ConsumerQosLogsFileUnix { get; private set; }
         public string CompetitiveConsumersLogsFileUnix { get; private set; }
+        public string ConsumerTTLLogsFileWindows { get; private set; }
+        public string ConsumerTTLLogsFileUnix { get; private set; }
         public string RabbitMQHostName { get; private set; }
 
         public Configuration(
@@ -26,11 +30,15 @@ namespace SharedDomain.ConfigurationUtils
             ushort qosPrefetchLevelMultiple,
             int cooldownSeconds,
             int publisherInterMessageDelayMilliseconds,
+            int consumerDelayMilliseconds,
             int numberOfCompetitiveConsumers,
+            int timeToLiveMilliseconds,
             string consumerQosLogsFileWindows,
             string competitiveConsumersLogsFileWindows,
             string consumerQosLogsFileUnix,
             string competitiveConsumersLogsFileUnix,
+            string consumerTTLLogsFileWindows,
+            string consumerTTLLogsFileUnix,
             string rabbitMQHostName)
         {
             QueueName = queueName;
@@ -41,11 +49,15 @@ namespace SharedDomain.ConfigurationUtils
             CooldownSeconds = cooldownSeconds;
             PublisherInterMessageDelayMilliseconds = publisherInterMessageDelayMilliseconds;
             NumberOfCompetitiveConsumers = numberOfCompetitiveConsumers;
+            ConsumerDelayMilliseconds = consumerDelayMilliseconds;
             ConsumerQosLogsFileWindows = consumerQosLogsFileWindows;
             CompetitiveConsumersLogsFileWindows = competitiveConsumersLogsFileWindows;
             ConsumerQosLogsFileUnix = consumerQosLogsFileUnix;
             CompetitiveConsumersLogsFileUnix = competitiveConsumersLogsFileUnix;
             RabbitMQHostName = rabbitMQHostName;
+            TimeToLiveMilliseconds = timeToLiveMilliseconds;
+            ConsumerTTLLogsFileWindows = consumerTTLLogsFileWindows;
+            ConsumerTTLLogsFileUnix = consumerTTLLogsFileUnix;
         }
 
         public void PrintConfigurationSettings()
@@ -58,7 +70,9 @@ namespace SharedDomain.ConfigurationUtils
                 $"QoS prefetch count for multiple consumer case: {QoSPrefetchLevelMultiple} {Environment.NewLine}" +
                 $"Inter run cooldown seconds : {CooldownSeconds} {Environment.NewLine}" +
                 $"Publisher intermessage delay ms : {PublisherInterMessageDelayMilliseconds} {Environment.NewLine}" +
+                $"Consumer delay ms : {ConsumerDelayMilliseconds} {Environment.NewLine}" +
                 $"Number of competitive consumers: {NumberOfCompetitiveConsumers} {Environment.NewLine}" +
+                $"Messages time to live milliseconds: {TimeToLiveMilliseconds} {Environment.NewLine}" +
                 $"Rabbit host : {RabbitMQHostName}");
 
         }

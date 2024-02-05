@@ -17,6 +17,7 @@ namespace SharedDomain.Consumers.Competitive
         private ushort _qosPrefetchLevelMultiple;
         private int _totalMessagesToReceive;
         private int _numberOfCompetitiveConsumers;
+        private int _consumerDelay;
         private string _consumerCompetitiveLogsFileWindows;
         private string _consumerCompetitiveLogsFileUnix;
 
@@ -30,6 +31,7 @@ namespace SharedDomain.Consumers.Competitive
             _consumerCompetitiveLogsFileUnix = configuration.CompetitiveConsumersLogsFileUnix;
             _consumerCompetitiveLogsFileWindows = configuration.CompetitiveConsumersLogsFileWindows;
             _qosPrefetchLevelMultiple = configuration.QoSPrefetchLevelMultiple;
+            _consumerDelay = configuration.ConsumerDelayMilliseconds;
 
             _packetsData = new List<BenchmarkData>();
             _statisticsData = new List<StatisticsData>();
@@ -41,7 +43,7 @@ namespace SharedDomain.Consumers.Competitive
                 queue: _queueName,
                 durable: false,
                 exclusive: false,
-                autoDelete: false,
+                autoDelete: true,
                 arguments: null);
 
             channel.BasicQos(0, _qosPrefetchLevelMultiple, true);
@@ -72,26 +74,45 @@ namespace SharedDomain.Consumers.Competitive
 
         private void ConsumeMethod(object? model, BasicDeliverEventArgs eventArgs)
         {
+            var benchmarkData = ObtainMessageData(eventArgs);
+
+            _packetsData.Add(benchmarkData);
+
+            ExecuteDelay();
+            WriteMessageOnConsole(benchmarkData);
+            WriteSingleRunLog(benchmarkData);
+            WriteMultipleRunsLog(benchmarkData);
+        }
+
+        private void ExecuteDelay()
+        {
+            if (_consumerDelay > 0)
+            {
+                Thread.Sleep(_consumerDelay);
+            }
+        }
+
+        private BenchmarkData ObtainMessageData(BasicDeliverEventArgs eventArgs)
+        {
             var receivedTime = DateTime.UtcNow.TimeOfDay;
             var body = eventArgs.Body.ToArray();
             var message = Encoding.UTF8.GetString(body).Split(',');
             var sentTime = TimeSpan.Parse(message[2]);
             var delay = receivedTime - sentTime;
 
-            var benchmarkData = new BenchmarkData(
+            return new BenchmarkData(
                 int.Parse(message[0]),
                 message[1],
                 sentTime,
                 receivedTime,
                 delay);
+        }
 
-            _packetsData.Add(benchmarkData);
-
-            Console.WriteLine($"Sent : {benchmarkData.SentTime} | Received : {benchmarkData.ReceivedTime} " +
-                $"| Msg number : {benchmarkData.MessageNumber}");
-
-            WriteSingleRunLog(benchmarkData);
-            WriteMultipleRunsLog(benchmarkData);
+        private void WriteMessageOnConsole(BenchmarkData benchmarkData)
+        {
+            Console.WriteLine($"Sent : {benchmarkData.SentTime} | " +
+                $"Received : {benchmarkData.ReceivedTime} " +
+                $"| Msg number  : {benchmarkData.MessageNumber}");
         }
 
         private void WriteSingleRunLog(BenchmarkData benchmarkData)

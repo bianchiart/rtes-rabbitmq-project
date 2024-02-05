@@ -1,33 +1,36 @@
-﻿using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
+﻿using RabbitMQ.Client.Events;
+using RabbitMQ.Client;
 using SharedDomain.BenchmarkUtils;
 using SharedDomain.BenchmarkUtils.Models;
 using SharedDomain.ConfigurationUtils;
 using System.Text;
 
-namespace SharedDomain.Consumers.QoS
+namespace SharedDomain.Consumers.TTL
 {
-    public class ConsumerQoS
+    public class ConsumerTTL
     {
         private List<BenchmarkData> _packetsData;
         private List<StatisticsData> _statisticsData;
         private int _numberOfMessagesPerRun;
         private string _queueName;
         private int _numberOfRuns;
-        private int _totalMessagesToReceive;
         private ushort _qosPrefetchLevel;
+        private int _totalMessagesToReceive;
+        private string _consumerTTLLogsFileWindows;
+        private string _consumerTTLLogsFileUnix;
+        private int _messagesTimeToLive;
         private int _consumerDelay;
-        private string _consumerQosLogsFileWindows;
-        private string _consumerQosLogsFileUnix;
 
-        public ConsumerQoS(Configuration configuration)
+        public ConsumerTTL(Configuration configuration)
         {
             _numberOfMessagesPerRun = configuration.NumberOfMessagesPerRun;
             _queueName = configuration.QueueName;
             _numberOfRuns = configuration.NumberOfRuns;
             _totalMessagesToReceive = _numberOfMessagesPerRun * _numberOfRuns;
-            _consumerQosLogsFileUnix = configuration.ConsumerQosLogsFileUnix;
-            _consumerQosLogsFileWindows = configuration.ConsumerQosLogsFileWindows;
+            _consumerTTLLogsFileWindows = configuration.ConsumerTTLLogsFileWindows;
+            _consumerTTLLogsFileUnix = configuration.ConsumerTTLLogsFileUnix;
+            _qosPrefetchLevel = configuration.QosPrefetchLevel;
+            _messagesTimeToLive = configuration.TimeToLiveMilliseconds;
             _consumerDelay = configuration.ConsumerDelayMilliseconds;
 
             _packetsData = new List<BenchmarkData>();
@@ -36,12 +39,15 @@ namespace SharedDomain.Consumers.QoS
 
         public void InitializeConsumer(IModel channel)
         {
+            var args = new Dictionary<string, object>();
+            args.Add("x-message-ttl", _messagesTimeToLive);
+
             channel.QueueDeclare(
                 queue: _queueName,
                 durable: false,
                 exclusive: false,
                 autoDelete: true,
-                arguments: null);
+                arguments: args);
 
             channel.BasicQos(0, _qosPrefetchLevel, true);
             var consumer = new EventingBasicConsumer(channel);
@@ -68,7 +74,7 @@ namespace SharedDomain.Consumers.QoS
 
         private void ExecuteDelay()
         {
-            if (_consumerDelay > 0)
+            if(_consumerDelay > 0)
             {
                 Thread.Sleep(_consumerDelay);
             }
@@ -105,8 +111,8 @@ namespace SharedDomain.Consumers.QoS
                     _packetsData, (int)(benchmarkData.MessageNumber / _numberOfMessagesPerRun));
                 WriteStatisticsOnFile.Write(
                     statistics,
-                    _consumerQosLogsFileWindows,
-                    _consumerQosLogsFileUnix);
+                    _consumerTTLLogsFileWindows,
+                    _consumerTTLLogsFileUnix);
                 _statisticsData.Add(statistics);
                 _packetsData.Clear();
             }
@@ -119,8 +125,8 @@ namespace SharedDomain.Consumers.QoS
                 var runsStatistics = StatisticsCalculator.Calculate(_statisticsData);
                 WriteStatisticsOnFile.Write(
                     runsStatistics,
-                    _consumerQosLogsFileWindows,
-                    _consumerQosLogsFileUnix);
+                    _consumerTTLLogsFileWindows,
+                    _consumerTTLLogsFileUnix);
                 _statisticsData.Clear();
             }
         }
