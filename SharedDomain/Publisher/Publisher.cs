@@ -1,6 +1,8 @@
 ﻿using RabbitMQ.Client;
 using SharedDomain.ConfigurationUtils;
+using System.Reflection;
 using System.Text;
+using System.Threading.Channels;
 
 namespace SharedDomain.Publisher
 {
@@ -28,19 +30,13 @@ namespace SharedDomain.Publisher
 
         public void Execute(IModel channel)
         {
-            var args = new Dictionary<string, object>();
-            if (_messagesTimeToLive > 0)
-            {
-                args.Add("x-message-ttl", _messagesTimeToLive);
-            }
-
             channel.QueueDeclare(
                 queue: _queueName,
                 durable: false,
                 exclusive: false,
                 autoDelete: true,
-                arguments: args.Keys.Count > 0 ? args : null);
-
+                arguments: null);
+            
             SendMessages(channel);
         }
 
@@ -48,15 +44,19 @@ namespace SharedDomain.Publisher
         {
             Console.WriteLine("Publisher is ready. Press [enter] when you want to start sending messages.");
             Console.ReadLine();
+            
+            var properties = channel.CreateBasicProperties();
+            properties.Expiration = _messagesTimeToLive.ToString();
 
             for (int i = 1; i <= _totalMessagesToSend; i++)
             {
                 var dateTimeNow = DateTime.UtcNow.TimeOfDay;
                 var body = Encoding.UTF8.GetBytes(CreateMessageToSend(i, dateTimeNow));
+                
                 channel.BasicPublish(
                     exchange: string.Empty,
                     routingKey: _queueName,
-                    basicProperties: null,
+                    basicProperties: _messagesTimeToLive > 0 ? properties : null,
                     body: body);
                 
                 Console.WriteLine($"{dateTimeNow} : Sent message number {i}");

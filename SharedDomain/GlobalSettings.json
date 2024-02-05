@@ -1,7 +1,7 @@
 ﻿{
   "RabbitMQHostName": "localhost",
   "QueueName": "RabbitMQTest",
-  "NumberOfMessagesPerRun": 100000,
+  "NumberOfMessagesPerRun": 1000,
   "NumberOfRuns": 10,
   "QosPrefetchLevel": 1,
   "QoSPrefetchLevelMultiple": 5,
