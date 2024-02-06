@@ -5,33 +5,35 @@ using SharedDomain.BenchmarkUtils.Models;
 using SharedDomain.ConfigurationUtils;
 using System.Text;
 
-namespace SharedDomain.Consumers.TTL
+namespace SharedDomain.Consumers.Exchange
 {
-    public class ConsumerTTL
+    public class ConsumerForExchange
     {
         private List<BenchmarkData> _packetsData;
         private List<StatisticsData> _statisticsData;
         private int _numberOfMessagesPerRun;
-        private string _queueName;
+        private string _exchangeName;
         private int _numberOfRuns;
         private ushort _qosPrefetchLevel;
         private int _totalMessagesToReceive;
-        private string _consumerTTLLogsFileWindows;
-        private string _consumerTTLLogsFileUnix;
+        private string _consumerExchangeLogsFileWindows;
+        private string _consumerExchangeLogsFileUnix;
         private int _messagesTimeToLive;
         private int _consumerDelay;
+        private int _consumerIndex;
 
-        public ConsumerTTL(Configuration configuration)
+        public ConsumerForExchange(Configuration configuration, int consumerIndex)
         {
             _numberOfMessagesPerRun = configuration.NumberOfMessagesPerRun;
-            _queueName = configuration.QueueName;
+            _exchangeName = configuration.QueueName;
             _numberOfRuns = configuration.NumberOfRuns;
             _totalMessagesToReceive = _numberOfMessagesPerRun * _numberOfRuns;
-            _consumerTTLLogsFileWindows = configuration.ConsumerTTLLogsFileWindows;
-            _consumerTTLLogsFileUnix = configuration.ConsumerTTLLogsFileUnix;
+            _consumerExchangeLogsFileWindows = configuration.ConsumerExchangeLogsFileWindows;
+            _consumerExchangeLogsFileUnix = configuration.ConsumerExchangeLogsFileUnix;
             _qosPrefetchLevel = configuration.QosPrefetchLevel;
             _messagesTimeToLive = configuration.TimeToLiveMilliseconds;
             _consumerDelay = configuration.ConsumerDelayMilliseconds;
+            _consumerIndex = consumerIndex;
 
             _packetsData = new List<BenchmarkData>();
             _statisticsData = new List<StatisticsData>();
@@ -39,23 +41,21 @@ namespace SharedDomain.Consumers.TTL
 
         public void InitializeConsumer(IModel channel)
         {
-            var args = new Dictionary<string, object>();
-            args.Add("x-message-ttl", _messagesTimeToLive);
+            channel.ExchangeDeclare(exchange: _exchangeName, type: ExchangeType.Fanout);
 
-            channel.QueueDeclare(
-                queue: _queueName,
-                durable: false,
-                exclusive: false,
-                autoDelete: true,
-                arguments: args);
+            var queueName = channel.QueueDeclare().QueueName;
+            
+            channel.QueueBind(queue: queueName,
+                  exchange: _exchangeName,
+                  routingKey: string.Empty);
 
             channel.BasicQos(0, _qosPrefetchLevel, true);
-            var consumer = new EventingBasicConsumer(channel);
 
+            var consumer = new EventingBasicConsumer(channel);
             consumer.Received += Consume;
 
             channel.BasicConsume(
-                queue: _queueName,
+                queue: queueName,
                 autoAck: true,
                 consumer: consumer);
         }
@@ -111,8 +111,8 @@ namespace SharedDomain.Consumers.TTL
                     _packetsData, (int)(benchmarkData.MessageNumber / _numberOfMessagesPerRun));
                 WriteStatisticsOnFile.Write(
                     statistics,
-                    _consumerTTLLogsFileWindows,
-                    _consumerTTLLogsFileUnix);
+                    _consumerExchangeLogsFileWindows + _consumerIndex.ToString(),
+                    _consumerExchangeLogsFileUnix + _consumerIndex.ToString());
                 _statisticsData.Add(statistics);
                 _packetsData.Clear();
             }
@@ -125,8 +125,8 @@ namespace SharedDomain.Consumers.TTL
                 var runsStatistics = StatisticsCalculator.Calculate(_statisticsData);
                 WriteStatisticsOnFile.Write(
                     runsStatistics,
-                    _consumerTTLLogsFileWindows,
-                    _consumerTTLLogsFileUnix);
+                    _consumerExchangeLogsFileWindows + _consumerIndex.ToString(),
+                    _consumerExchangeLogsFileUnix + _consumerIndex.ToString());
                 _statisticsData.Clear();
             }
         }

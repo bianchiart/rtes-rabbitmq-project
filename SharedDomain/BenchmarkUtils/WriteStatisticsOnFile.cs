@@ -7,14 +7,14 @@ namespace SharedDomain.BenchmarkUtils
         public static void Write(StatisticsData data, string windowsFilePath, string unixFilePath)
         {
             var actualPath = GetEnvironmentFilePath(windowsFilePath, unixFilePath);
-            File.AppendAllText(actualPath, data.ToString() + Environment.NewLine);
+            File.AppendAllText(actualPath + ".txt", data.ToString() + Environment.NewLine);
             Console.WriteLine(data.ToString());
         }
 
         public static void Write(RunsStatisticsData data, string windowsFilePath, string unixFilePath)
         {
             var actualPath = GetEnvironmentFilePath(windowsFilePath, unixFilePath);
-            File.AppendAllText(actualPath, data.ToString() + Environment.NewLine);
+            File.AppendAllText(actualPath + ".txt", data.ToString() + Environment.NewLine);
             Console.WriteLine(data.ToString());
         }
 

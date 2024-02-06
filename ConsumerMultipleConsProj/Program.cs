@@ -1,6 +1,6 @@
 ﻿using RabbitMQ.Client;
 using SharedDomain.ConfigurationUtils;
-using SharedDomain.Consumers.TTL;
+using SharedDomain.Consumers.Exchange;
 
 namespace ConsumerTTLProj
 {
@@ -16,12 +16,21 @@ namespace ConsumerTTLProj
 
             configuration.PrintConfigurationSettings();
 
-            var consumerTTL = new ConsumerTTL(configuration);
+            var consumers = new List<ConsumerForExchange>();
+            for (int i = 1; i<= configuration.NumberOfConsumersInExchange; i++)
+            {
+                consumers.Add(new ConsumerForExchange(configuration, i));
+            }
 
-            Console.WriteLine("Initializing consumer...");
-            consumerTTL.InitializeConsumer(channel);
+            Console.WriteLine("Initializing consumers...");
+            
+            foreach(ConsumerForExchange consumer in consumers)
+            {
+                consumer.InitializeConsumer(channel);
+            }
 
-            Console.WriteLine($"Consumer QoS waiting for messages...");
+            Console.WriteLine($"Consumers in exchange waiting for messages...");
+            
             Console.WriteLine("Press key [enter] to exit.");
             Console.ReadLine();
 

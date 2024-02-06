@@ -16,8 +16,17 @@ namespace PublisherProj
             
             configuration.PrintConfigurationSettings();
 
-            var publisher = new Publisher(configuration);
-            publisher.Execute(channel);
+            if (configuration.UsePublisherForExchange)
+            {
+                var publisher = new PublisherForExchange(configuration);
+                publisher.Execute(channel);
+            }
+            else
+            {
+                var publisher = new Publisher(configuration);
+                publisher.Execute(channel);
+            }
+            
 
             Console.WriteLine(" Press [enter] to exit.");
             Console.ReadLine();

@@ -14,13 +14,15 @@ namespace SharedDomain.ConfigurationUtils
         public int PublisherInterMessageDelayMilliseconds { get; private set; }
         public int ConsumerDelayMilliseconds { get; private set; }
         public int NumberOfCompetitiveConsumers { get; private set; }
+        public int NumberOfConsumersInExchange { get; private set; }
         public string ConsumerQosLogsFileWindows { get; private set; }
         public string CompetitiveConsumersLogsFileWindows { get; private set; }
         public string ConsumerQosLogsFileUnix { get; private set; }
         public string CompetitiveConsumersLogsFileUnix { get; private set; }
-        public string ConsumerTTLLogsFileWindows { get; private set; }
-        public string ConsumerTTLLogsFileUnix { get; private set; }
+        public string ConsumerExchangeLogsFileWindows { get; private set; }
+        public string ConsumerExchangeLogsFileUnix { get; private set; }
         public string RabbitMQHostName { get; private set; }
+        public bool UsePublisherForExchange { get; private set; }
 
         public Configuration(
             string queueName,
@@ -32,14 +34,16 @@ namespace SharedDomain.ConfigurationUtils
             int publisherInterMessageDelayMilliseconds,
             int consumerDelayMilliseconds,
             int numberOfCompetitiveConsumers,
+            int numberOfConsumersInExchange,
             int timeToLiveMilliseconds,
             string consumerQosLogsFileWindows,
             string competitiveConsumersLogsFileWindows,
             string consumerQosLogsFileUnix,
             string competitiveConsumersLogsFileUnix,
-            string consumerTTLLogsFileWindows,
-            string consumerTTLLogsFileUnix,
-            string rabbitMQHostName)
+            string consumerExchangeLogsFileWindows,
+            string consumerExchangeLogsFileUnix,
+            string rabbitMQHostName,
+            bool usePublisherForExchange)
         {
             QueueName = queueName;
             NumberOfMessagesPerRun = numberOfMessagesPerRun;
@@ -56,8 +60,10 @@ namespace SharedDomain.ConfigurationUtils
             CompetitiveConsumersLogsFileUnix = competitiveConsumersLogsFileUnix;
             RabbitMQHostName = rabbitMQHostName;
             TimeToLiveMilliseconds = timeToLiveMilliseconds;
-            ConsumerTTLLogsFileWindows = consumerTTLLogsFileWindows;
-            ConsumerTTLLogsFileUnix = consumerTTLLogsFileUnix;
+            ConsumerExchangeLogsFileWindows = consumerExchangeLogsFileWindows;
+            ConsumerExchangeLogsFileUnix = consumerExchangeLogsFileUnix;
+            NumberOfConsumersInExchange = numberOfConsumersInExchange;
+            UsePublisherForExchange = usePublisherForExchange;
         }
 
         public void PrintConfigurationSettings()
@@ -72,9 +78,10 @@ namespace SharedDomain.ConfigurationUtils
                 $"Publisher intermessage delay ms : {PublisherInterMessageDelayMilliseconds} {Environment.NewLine}" +
                 $"Consumer delay ms : {ConsumerDelayMilliseconds} {Environment.NewLine}" +
                 $"Number of competitive consumers: {NumberOfCompetitiveConsumers} {Environment.NewLine}" +
+                $"Number of consumers for the exchange: {NumberOfConsumersInExchange} {Environment.NewLine}" +
                 $"Messages time to live milliseconds: {TimeToLiveMilliseconds} {Environment.NewLine}" +
+                $"Publisher initialized for sending messages to exchange: {UsePublisherForExchange} {Environment.NewLine}" +
                 $"Rabbit host : {RabbitMQHostName}");
-
         }
     }
 

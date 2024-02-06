@@ -10,10 +10,12 @@
   "NumberOfCompetitiveConsumers": 5,
   "TimeToLiveMilliseconds": 1000,
   "ConsumerDelayMilliseconds": 0,
-  "ConsumerQosLogsFileWindows": "D:\\Monnezza\\logsQoS.txt",
-  "CompetitiveConsumersLogsFileWindows": "D:\\Monnezza\\logsCompCons.txt",
-  "ConsumerQosLogsFileUnix": "/home/arturo/Desktop/logsQoS.txt",
-  "CompetitiveConsumersLogsFileUnix": "/home/arturo/Desktop/logsCompCons.txt",
-  "ConsumerTTLLogsFileUnix": "/home/arturo/Desktop/logsTTL.txt",
-  "ConsumerTTLLogsFileWindows": "D:\\Monnezza\\logsTTL.txt"
+  "NumberOfConsumersInExchange": 2,
+  "UsePublisherForExchange": true,
+  "ConsumerQosLogsFileWindows": "D:\\Monnezza\\logsQoS",
+  "CompetitiveConsumersLogsFileWindows": "D:\\Monnezza\\logsCompCons",
+  "ConsumerQosLogsFileUnix": "/home/arturo/Desktop/logsQoS",
+  "CompetitiveConsumersLogsFileUnix": "/home/arturo/Desktop/logsCompCons",
+  "ConsumerExchangeLogsFileUnix": "/home/arturo/Desktop/logsExchange",
+  "ConsumerExchangeLogsFileWindows": "D:\\Monnezza\\logsExchange"
 }
