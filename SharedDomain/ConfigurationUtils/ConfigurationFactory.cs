@@ -13,8 +13,6 @@ namespace SharedDomain.ConfigurationUtils
         public int CooldownSeconds { get; private set; }
         public int PublisherInterMessageDelayMilliseconds { get; private set; }
         public int ConsumerDelayMilliseconds { get; private set; }
-        public int NumberOfCompetitiveConsumers { get; private set; }
-        public int NumberOfConsumersInExchange { get; private set; }
         public string ConsumerQosLogsFileWindows { get; private set; }
         public string CompetitiveConsumersLogsFileWindows { get; private set; }
         public string ConsumerQosLogsFileUnix { get; private set; }
@@ -33,8 +31,6 @@ namespace SharedDomain.ConfigurationUtils
             int cooldownSeconds,
             int publisherInterMessageDelayMilliseconds,
             int consumerDelayMilliseconds,
-            int numberOfCompetitiveConsumers,
-            int numberOfConsumersInExchange,
             int timeToLiveMilliseconds,
             string consumerQosLogsFileWindows,
             string competitiveConsumersLogsFileWindows,
@@ -52,7 +48,6 @@ namespace SharedDomain.ConfigurationUtils
             QoSPrefetchLevelMultiple = qosPrefetchLevelMultiple;
             CooldownSeconds = cooldownSeconds;
             PublisherInterMessageDelayMilliseconds = publisherInterMessageDelayMilliseconds;
-            NumberOfCompetitiveConsumers = numberOfCompetitiveConsumers;
             ConsumerDelayMilliseconds = consumerDelayMilliseconds;
             ConsumerQosLogsFileWindows = consumerQosLogsFileWindows;
             CompetitiveConsumersLogsFileWindows = competitiveConsumersLogsFileWindows;
@@ -62,7 +57,6 @@ namespace SharedDomain.ConfigurationUtils
             TimeToLiveMilliseconds = timeToLiveMilliseconds;
             ConsumerExchangeLogsFileWindows = consumerExchangeLogsFileWindows;
             ConsumerExchangeLogsFileUnix = consumerExchangeLogsFileUnix;
-            NumberOfConsumersInExchange = numberOfConsumersInExchange;
             UsePublisherForExchange = usePublisherForExchange;
         }
 
@@ -77,8 +71,6 @@ namespace SharedDomain.ConfigurationUtils
                 $"Inter run cooldown seconds : {CooldownSeconds} {Environment.NewLine}" +
                 $"Publisher intermessage delay ms : {PublisherInterMessageDelayMilliseconds} {Environment.NewLine}" +
                 $"Consumer delay ms : {ConsumerDelayMilliseconds} {Environment.NewLine}" +
-                $"Number of competitive consumers: {NumberOfCompetitiveConsumers} {Environment.NewLine}" +
-                $"Number of consumers for the exchange: {NumberOfConsumersInExchange} {Environment.NewLine}" +
                 $"Messages time to live milliseconds: {TimeToLiveMilliseconds} {Environment.NewLine}" +
                 $"Publisher initialized for sending messages to exchange: {UsePublisherForExchange} {Environment.NewLine}" +
                 $"Rabbit host : {RabbitMQHostName}");

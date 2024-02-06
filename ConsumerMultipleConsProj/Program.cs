@@ -16,18 +16,9 @@ namespace ConsumerTTLProj
 
             configuration.PrintConfigurationSettings();
 
-            var consumers = new List<ConsumerForExchange>();
-            for (int i = 1; i<= configuration.NumberOfConsumersInExchange; i++)
-            {
-                consumers.Add(new ConsumerForExchange(configuration, i));
-            }
-
-            Console.WriteLine("Initializing consumers...");
+            var consumer = new ConsumerForExchange(configuration);
             
-            foreach(ConsumerForExchange consumer in consumers)
-            {
-                consumer.InitializeConsumer(channel);
-            }
+            consumer.InitializeConsumer(channel);
 
             Console.WriteLine($"Consumers in exchange waiting for messages...");
             
@@ -43,4 +34,6 @@ namespace ConsumerTTLProj
             Console.WriteLine("Exiting...");
         }
     }
+
+
 }

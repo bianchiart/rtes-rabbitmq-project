@@ -19,11 +19,27 @@ namespace ConsumerCompetitiveProj
             var consumerCompetitive = new ConsumerCompetitive(configuration);
 
             Console.WriteLine("Initializing consumers...");
-            consumerCompetitive.InitializeConsumers(channel);
+            consumerCompetitive.InitializeConsumer(channel);
 
             Console.WriteLine($"Competitive consumers waiting for messages...");
-            Console.WriteLine("Press key [enter] to exit.");
-            Console.ReadLine();
+
+            do
+            {
+                Console.WriteLine("Enter Y if you want to wait another run, else N, statistics will be calculated either way");
+                var line = Console.ReadLine();
+                
+                consumerCompetitive.WriteRunLog();
+                
+                if (line.Equals("Y") || line.Equals("y"))
+                {
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            while (true);
 
             Console.WriteLine("Closing channel...");
             channel.Close();
@@ -32,12 +48,12 @@ namespace ConsumerCompetitiveProj
             connection.Close();
 
             Console.WriteLine("Exiting...");
-        } 
-    } 
+        }
+    }
 }
 
 
-    
+
 
 
 

@@ -18,11 +18,10 @@ namespace SharedDomain.Consumers.Exchange
         private int _totalMessagesToReceive;
         private string _consumerExchangeLogsFileWindows;
         private string _consumerExchangeLogsFileUnix;
-        private int _messagesTimeToLive;
         private int _consumerDelay;
         private int _consumerIndex;
 
-        public ConsumerForExchange(Configuration configuration, int consumerIndex)
+        public ConsumerForExchange(Configuration configuration)
         {
             _numberOfMessagesPerRun = configuration.NumberOfMessagesPerRun;
             _exchangeName = configuration.QueueName;
@@ -31,9 +30,7 @@ namespace SharedDomain.Consumers.Exchange
             _consumerExchangeLogsFileWindows = configuration.ConsumerExchangeLogsFileWindows;
             _consumerExchangeLogsFileUnix = configuration.ConsumerExchangeLogsFileUnix;
             _qosPrefetchLevel = configuration.QosPrefetchLevel;
-            _messagesTimeToLive = configuration.TimeToLiveMilliseconds;
             _consumerDelay = configuration.ConsumerDelayMilliseconds;
-            _consumerIndex = consumerIndex;
 
             _packetsData = new List<BenchmarkData>();
             _statisticsData = new List<StatisticsData>();
@@ -41,6 +38,7 @@ namespace SharedDomain.Consumers.Exchange
 
         public void InitializeConsumer(IModel channel)
         {
+            _consumerIndex = new Random().Next(100000);
             channel.ExchangeDeclare(exchange: _exchangeName, type: ExchangeType.Fanout);
 
             var queueName = channel.QueueDeclare().QueueName;

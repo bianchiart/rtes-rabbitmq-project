@@ -10,35 +10,27 @@ namespace SharedDomain.Consumers.Competitive
     public class ConsumerCompetitive
     {
         private List<BenchmarkData> _packetsData;
-        private List<StatisticsData> _statisticsData;
-        private int _numberOfMessagesPerRun;
         private string _queueName;
-        private int _numberOfRuns;
         private ushort _qosPrefetchLevelMultiple;
-        private int _totalMessagesToReceive;
-        private int _numberOfCompetitiveConsumers;
         private int _consumerDelay;
         private string _consumerCompetitiveLogsFileWindows;
         private string _consumerCompetitiveLogsFileUnix;
+        private int _consumerIndex;
 
         public ConsumerCompetitive(Configuration configuration)
         {
-            _numberOfMessagesPerRun = configuration.NumberOfMessagesPerRun;
             _queueName = configuration.QueueName;
-            _numberOfRuns = configuration.NumberOfRuns;
-            _numberOfCompetitiveConsumers = configuration.NumberOfCompetitiveConsumers;
-            _totalMessagesToReceive = _numberOfMessagesPerRun * _numberOfRuns;
             _consumerCompetitiveLogsFileUnix = configuration.CompetitiveConsumersLogsFileUnix;
             _consumerCompetitiveLogsFileWindows = configuration.CompetitiveConsumersLogsFileWindows;
             _qosPrefetchLevelMultiple = configuration.QoSPrefetchLevelMultiple;
             _consumerDelay = configuration.ConsumerDelayMilliseconds;
 
             _packetsData = new List<BenchmarkData>();
-            _statisticsData = new List<StatisticsData>();
         }
 
-        public void InitializeConsumers(IModel channel)
+        public void InitializeConsumer(IModel channel)
         {
+            _consumerIndex = new Random().Next(100000);
             channel.QueueDeclare(
                 queue: _queueName,
                 durable: false,
@@ -48,28 +40,19 @@ namespace SharedDomain.Consumers.Competitive
 
             channel.BasicQos(0, _qosPrefetchLevelMultiple, true);
 
-            InstantiateConsumers(channel);
+            InstantiateConsumer(channel);
             Console.WriteLine($"Number of consumers on queue {_queueName} : {channel.ConsumerCount(_queueName)}");
         }
 
-        private void InstantiateConsumers(IModel channel)
+        private void InstantiateConsumer(IModel channel)
         {
-            var consumers = new List<EventingBasicConsumer>();
+            var consumer = new EventingBasicConsumer(channel);
+            consumer.Received += ConsumeMethod;
 
-            for (int i = 0; i < _numberOfCompetitiveConsumers; i++)
-            {
-                var consumer = new EventingBasicConsumer(channel);
-                consumer.Received += ConsumeMethod;
-                consumers.Add(consumer);
-            }
-
-            foreach (var consumer in consumers)
-            {
-                channel.BasicConsume(
-                    queue: _queueName,
-                    autoAck: true,
-                    consumer: consumer);
-            }
+            channel.BasicConsume(
+                queue: _queueName,
+                autoAck: true,
+                consumer: consumer);
         }
 
         private void ConsumeMethod(object? model, BasicDeliverEventArgs eventArgs)
@@ -80,8 +63,6 @@ namespace SharedDomain.Consumers.Competitive
 
             ExecuteDelay();
             WriteMessageOnConsole(benchmarkData);
-            WriteSingleRunLog(benchmarkData);
-            WriteMultipleRunsLog(benchmarkData);
         }
 
         private void ExecuteDelay()
@@ -110,51 +91,20 @@ namespace SharedDomain.Consumers.Competitive
 
         private void WriteMessageOnConsole(BenchmarkData benchmarkData)
         {
-            Console.WriteLine($"Sent : {benchmarkData.SentTime} | " +
+            Console.WriteLine($"Consumer : {_consumerIndex} | Sent : {benchmarkData.SentTime} | " +
                 $"Received : {benchmarkData.ReceivedTime} " +
                 $"| Msg number  : {benchmarkData.MessageNumber}");
         }
 
-        private void WriteSingleRunLog(BenchmarkData benchmarkData)
+        public void WriteRunLog()
         {
-            if (benchmarkData.MessageNumber % _numberOfMessagesPerRun == 0)
-            {
-                var statistics = StatisticsCalculator.Calculate(
-                    _packetsData, (int)(benchmarkData.MessageNumber / _numberOfMessagesPerRun));
-                CheckMessageOrder(_packetsData.Select(x => x.MessageNumber).ToArray());
-                WriteStatisticsOnFile.Write(
+            var statistics = StatisticsCalculator.Calculate(
+                _packetsData, 1);
+            WriteStatisticsOnFile.Write(
                     statistics,
-                    _consumerCompetitiveLogsFileWindows,
-                    _consumerCompetitiveLogsFileUnix);
-                _statisticsData.Add(statistics);
-                _packetsData.Clear();
-            }
-        }
-
-        private void WriteMultipleRunsLog(BenchmarkData benchmarkData)
-        {
-            if (benchmarkData.MessageNumber == _totalMessagesToReceive)
-            {
-                var runsStatistics = StatisticsCalculator.Calculate(_statisticsData);
-                WriteStatisticsOnFile.Write(
-                    runsStatistics,
-                    _consumerCompetitiveLogsFileWindows,
-                    _consumerCompetitiveLogsFileUnix);
-                _statisticsData.Clear();
-            }
-        }
-
-        private void CheckMessageOrder(long[] messageIndexes)
-        {
-            for (int i = 1; i < messageIndexes.Length; i++)
-            {
-                if (messageIndexes[i - 1] > messageIndexes[i])
-                {
-                    Console.WriteLine("Messages were not consumed in correct order :(");
-                    return;
-                }
-            }
-            Console.WriteLine("Messages were consumed in correct order :)");
+                    _consumerCompetitiveLogsFileWindows + _consumerIndex.ToString(),
+                    _consumerCompetitiveLogsFileUnix + _consumerIndex.ToString());
+            _packetsData.Clear();
         }
     }
 }
